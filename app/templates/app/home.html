@@ -1,0 +1,9 @@
+{% extends 'app/base.html' %}
+{% block title %}Главная - Household{% endblock %}
+{% block content %}
+    <section class="hero">
+        <h1>Добро пожаловать в Household</h1>
+        <p>Household — это удобное приложение для управления домашними делами, финансами и задачами. Организуйте свою жизнь с легкостью!</p>
+        <a href="{% url 'login' %}" class="btn">Вход</a>
+    </section>
+{% endblock %}

@@ -1,0 +1,287 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Траты{% endblock %}
+
+{% block content %}
+<div class="p-4 md:p-6 bg-[#E8F6EA] min-h-screen">
+    <!-- Заголовок и кнопка -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-[#2F5233]">Траты</h1>
+        <button 
+            onclick="openAddExpenseModal()"
+            class="bg-[#7DAF84] text-white py-2 px-4 md:py-3 md:px-6 rounded-xl hover:bg-[#6A9A70] transition duration-200 flex items-center gap-2 text-sm md:text-base">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14"/><path d="M5 12h14"/>
+            </svg>
+            Добавить
+        </button>
+    </div>
+
+    <!-- Таблица трат -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-[#F8FAF9] border-b border-[#E8F6EA]">
+                    <tr class="text-left text-[#2F5233]">
+                        <th class="py-3 px-4 font-semibold text-sm md:text-base">Дата</th>
+                        <th class="py-3 px-4 font-semibold text-sm md:text-base">Категория</th>
+                        <th class="py-3 px-4 font-semibold text-sm md:text-base">Сумма</th>
+                        <th class="py-3 px-4 font-semibold text-sm md:text-base"></th>
+                    </tr>
+                </thead>
+                <tbody id="expensesTableBody">
+                    {% for expense in expenses %}
+                    <tr class="border-b border-[#E8F6EA] hover:bg-[#F8FAF9] transition" data-expense-id="{{ expense.id }}">
+                        <td class="py-3 px-4 text-[#555] text-sm md:text-base">{{ expense.date|date:"d M Y" }}</td>
+                        <td class="py-3 px-4 text-[#555] text-sm md:text-base">{{ expense.category.name }}</td>
+                        <td class="py-3 px-4 text-[#555] font-medium text-sm md:text-base">{{ expense.amount|floatformat:2 }} ₽</td>
+                        <td class="py-3 px-4 relative">
+                            <button 
+                                onclick="toggleDropdown(event, {{ expense.id }})"
+                                class="text-[#7DAF84] hover:text-[#6A9A70] focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+                                </svg>
+                            </button>
+
+                            <!-- Выпадающее меню -->
+                            <div id="dropdown-{{ expense.id }}" class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-[#E8F6EA] z-10">
+                                <button 
+                                    onclick="openEditExpenseModal({{ expense.id }})"
+                                    class="w-full text-left px-4 py-2 text-sm text-[#2F5233] hover:bg-[#F8FAF9] rounded-t-xl flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg, width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5l3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                    Редактировать
+                                </button>
+                                <button 
+                                    onclick="deleteExpense({{ expense.id }})"
+                                    class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-xl flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                    </svg>
+                                    Удалить
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="py-8 text-center text-[#999] text-sm md:text-base">
+                            Пока нет трат. Добавьте первую!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно: Добавление / Редактирование --> 
+<dialog id="expenseModal" class="p-0 bg-transparent max-w-none w-auto">
+    <div class="fixed inset-0 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative animate-in fade-in zoom-in duration-200">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-xl font-bold text-[#2F5233]">Новая трата</h3>
+                <button onclick="closeModal()" class="text-[#999] hover:text-[#555]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6L6 18"/><path d="M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="expenseForm" method="post" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="formAction" value="add_expense">
+                <input type="hidden" name="expense_id" id="expenseId">
+
+                <!-- Сумма -->
+                <div>
+                    <label class="block text-sm font-medium text-[#2F5233] mb-1">Сумма</label>
+                    <input type="number" name="amount" step="0.01" required placeholder="0.00"
+                           class="w-full px-4 py-2 border border-[#E8F6EA] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7DAF84]">
+                </div>
+
+                <!-- Категория -->
+                <div>
+                    <label class="block text-sm font-medium text-[#2F5233] mb-1">Категория</label>
+                    <div class="flex gap-2">
+                        <select name="category" id="categorySelect"
+                                class="flex-1 px-4 py-2 border border-[#E8F6EA] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7DAF84]">
+                            <option value="">Выберите категорию</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" onclick="toggleNewCategory()"
+                                class="px-3 py-2 bg-[#F0F0F0] hover:bg-[#E0E0E0] rounded-xl text-[#2F5233] text-sm">
+                            +
+                        </button>
+                    </div>
+
+                    <div id="newCategoryField" class="mt-2 hidden">
+                        <input type="text" id="newCategoryName" placeholder="Название новой категории"
+                               class="w-full px-4 py-2 border border-[#E8F6EA] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7DAF84]">
+                        <div class="flex gap-2 mt-2">
+                            <button type="button" onclick="createCategory()"
+                                    class="flex-1 bg-[#7DAF84] hover:bg-[#6A9A70] text-white text-sm py-2 rounded-xl">
+                                Создать
+                            </button>
+                            <button type="button" onclick="toggleNewCategory()"
+                                    class="flex-1 bg-[#E8F6EA] hover:bg-[#D5EAD8] text-[#2F5233] text-sm py-2 rounded-xl">
+                                Отмена
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Описание -->
+                <div>
+                    <label class="block text-sm font-medium text-[#2F5233] mb-1">Описание (необязательно)</label>
+                    <input type="text" name="description" placeholder="Например: продукты в Перекрёстке"
+                           class="w-full px-4 py-2 border border-[#E8F6EA] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7DAF84]">
+                </div>
+
+                <!-- Дата -->
+                <div>
+                    <label class="block text-sm font-medium text-[#2F5233] mb-1">Дата</label>
+                    <input type="date" name="date" required
+                           class="w-full px-4 py-2 border border-[#E8F6EA] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#7DAF84]">
+                </div>
+
+                <!-- Кнопки -->
+                <div class="flex gap-3 pt-4">
+                    <button type="submit"
+                            class="flex-1 bg-[#7DAF84] hover:bg-[#6A9A70] text-white font-medium py-3 rounded-xl transition shadow-md">
+                        Сохранить
+                    </button>
+                    <button type="button" onclick="closeModal()"
+                            class="flex-1 bg-[#E8F6EA] hover:bg-[#D5EAD8] text-[#2F5233] font-medium py-3 rounded-xl transition">
+                        Отмена
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</dialog>
+
+<!-- Скрипты -->
+<script>
+    // === Открытие/закрытие модалки ===
+    function openAddExpenseModal() {
+        document.getElementById('modalTitle').textContent = 'Новая трата';
+        document.getElementById('formAction').value = 'add_expense';
+        document.getElementById('expenseId').value = '';
+        document.getElementById('expenseForm').reset();
+        document.getElementById('expenseModal').showModal();
+        document.getElementById('expenseForm').elements['date'].value = '{{ today|date:"Y-m-d" }}';
+    }
+
+    function closeModal() {
+        document.getElementById('expenseModal').close();
+    }
+
+    // === Выпадающее меню ===
+    function toggleDropdown(event, id) {
+        event.stopPropagation();
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            if (menu.id !== `dropdown-${id}`) menu.classList.add('hidden');
+        });
+        document.getElementById(`dropdown-${id}`).classList.toggle('hidden');
+    }
+
+    // Закрываем при клике вне
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => menu.classList.add('hidden'));
+    });
+
+    // === Редактирование ===
+    async function openEditExpenseModal(id) {
+        try {
+            const response = await fetch(`{% url 'expenses' %}?action=get_expense&id=${id}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                const exp = data.expense;
+                document.getElementById('modalTitle').textContent = 'Редактировать трату';
+                document.getElementById('formAction').value = 'edit_expense';
+                document.getElementById('expenseId').value = exp.id;
+                document.getElementById('expenseForm').elements['amount'].value = exp.amount;
+                document.getElementById('categorySelect').value = exp.category_id;
+                document.getElementById('expenseForm').elements['description'].value = exp.description || '';
+                document.getElementById('expenseForm').elements['date'].value = exp.date;
+                document.getElementById('expenseModal').showModal();
+            }
+        } catch (err) {
+            alert('Не удалось загрузить данные');
+        }
+    }
+
+    // === Удаление ===
+    async function deleteExpense(id) {
+        if (!confirm('Удалить эту трату?')) return;
+
+        try {
+            const response = await fetch("{% url 'expenses' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({
+                    'action': 'delete_expense',
+                    'expense_id': id
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                document.querySelector(`tr[data-expense-id="${id}"]`).remove();
+                if (document.querySelectorAll('#expensesTableBody tr[data-expense-id]').length === 0) {
+                    document.getElementById('expensesTableBody').innerHTML = `
+                        <tr><td colspan="4" class="py-8 text-center text-[#999]">Пока нет трат. Добавьте первую!</td></tr>
+                    `;
+                }
+            } else {
+                alert(data.error || 'Ошибка');
+            }
+        } catch (err) {
+            alert('Ошибка сети');
+        }
+    }
+
+    // === Создание категории (без изменений) ===
+    function toggleNewCategory() { /* ... как было ... */ }
+    async function createCategory() { /* ... как было ... */ }
+
+    // === Отправка формы (AJAX) ===
+    document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const action = formData.get('action');
+
+        try {
+            const response = await fetch("{% url 'expenses' %}", {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                closeModal();
+                location.reload(); // или обновить таблицу через JS
+            } else {
+                alert(data.error || 'Ошибка');
+            }
+        } catch (err) {
+            alert('Ошибка');
+        }
+    });
+</script>
+{% endblock %}

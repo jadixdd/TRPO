@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Авторизация{% endblock title %}</title>
+    <!-- Подключаем Tailwind CSS через CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Устанавливаем шрифт Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Сплошной цвет фона, как на картинке */
+            background-color: #E8F6EA; 
+        }
+        /* Стили для полей ввода, чтобы соответствовать дизайну */
+        .auth-input {
+            border-color: #D1D5DB; /* Светлая граница */
+            border-width: 1px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            color: #2F5233;
+            transition: all 0.2s;
+        }
+        .auth-input:focus {
+            border-color: #7DAF84; /* Зеленый при фокусе */
+            box-shadow: 0 0 0 2px #7DAF84;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <!-- Центральная карточка -->
+    <div class="bg-white p-8 sm:p-12 rounded-3xl shadow-2xl w-full max-w-sm md:max-w-md">
+        {% block content %}
+        <!-- Контент формы будет здесь -->
+        {% endblock content %}
+    </div>
+</body>
+</html>

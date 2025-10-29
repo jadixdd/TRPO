@@ -1,0 +1,52 @@
+{% extends 'app/auth_layout.html' %}
+
+{% block title %}Вход{% endblock title %}
+
+{% block content %}
+    <h1 class="text-3xl font-semibold mb-8 text-[#2F5233] text-center">Вход</h1>
+    
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+
+        <!-- Поле Email -->
+        <div class="mb-4">
+            <input 
+                type="text"  id="username"  name="username" placeholder="Имя пользователя" class="w-full auth-input" 
+                required
+            >
+        </div>
+
+        <!-- Поле Password -->
+        <div class="mb-8 relative">
+            <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                placeholder="Пароль" 
+                class="w-full auth-input" 
+                required
+            >
+        
+        </div>
+
+        <!-- Кнопка Входа -->
+        <button 
+            type="submit" 
+            class="w-full py-3 bg-[#7DAF84] hover:bg-[#6A9A70] text-white font-medium rounded-xl transition duration-200 shadow-md mb-8"
+        >
+            Войти
+        </button>
+    </form>
+
+    <!-- Секция Регистрации -->
+    <div class="flex items-center justify-between text-sm text-[#2F5233]">
+        <span class="opacity-75">Нет аккаунта?</span>
+        <a 
+            href="{% url 'register' %}" 
+            class="py-2 px-4 bg-[#E8F6EA] hover:bg-[#D5EAD8] text-[#2F5233] font-medium rounded-xl transition duration-200 border border-[#7DAF84]/50"
+        >
+            Регистрация
+        </a>
+    </div>
+
+{% endblock content %}

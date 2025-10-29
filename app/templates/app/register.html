@@ -1,0 +1,103 @@
+{% extends 'app/auth_layout.html' %}
+
+{% block title %}Регистрация{% endblock title %}
+
+{% block content %}
+    <h1 class="text-3xl font-semibold mb-8 text-[#2F5233] text-center">Регистрация</h1>
+    
+    <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+
+        <!-- Поле Username -->
+        <div class="mb-4">
+            <!-- Вывод ошибок поля -->
+            {% if form.username.errors %}
+                {% for error in form.username.errors %}
+                    <p class="text-xs text-red-500 mb-1">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+            <!-- Ввод с плейсхолдером и стилем -->
+            <input 
+                type="text" 
+                id="{{ form.username.id_for_label }}" 
+                name="{{ form.username.name }}" 
+                placeholder="{{ form.username.label }}" 
+                class="w-full auth-input" 
+                value="{{ form.username.value|default:'' }}"
+                required
+            >
+        </div>
+
+        <!-- Поле Email -->
+        <div class="mb-4">
+            {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                    <p class="text-xs text-red-500 mb-1">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+            <input 
+                type="email" 
+                id="{{ form.email.id_for_label }}" 
+                name="{{ form.email.name }}" 
+                placeholder="{{ form.email.label }}" 
+                class="w-full auth-input" 
+                value="{{ form.email.value|default:'' }}"
+                required
+            >
+        </div>
+
+        <!-- Поле Password -->
+        <div class="mb-4">
+            {% if form.password.errors %}
+                {% for error in form.password.errors %}
+                    <p class="text-xs text-red-500 mb-1">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+            <input 
+                type="password" 
+                id="{{ form.password.id_for_label }}" 
+                name="{{ form.password.name }}" 
+                placeholder="{{ form.password.label }}" 
+                class="w-full auth-input" 
+                required
+            >
+        </div>
+
+        <!-- Поле Password Confirm -->
+        <div class="mb-8">
+            {% if form.password_confirm.errors %}
+                {% for error in form.password_confirm.errors %}
+                    <p class="text-xs text-red-500 mb-1">{{ error }}</p>
+                {% endfor %}
+            {% endif %}
+            <input 
+                type="password" 
+                id="{{ form.password_confirm.id_for_label }}" 
+                name="{{ form.password_confirm.name }}" 
+                placeholder="{{ form.password_confirm.label }}" 
+                class="w-full auth-input" 
+                required
+            >
+        </div>
+
+        <!-- Кнопка Регистрации -->
+        <button 
+            type="submit" 
+            class="w-full py-3 bg-[#7DAF84] hover:bg-[#6A9A70] text-white font-medium rounded-xl transition duration-200 shadow-md mb-8"
+        >
+            Зарегистрироваться
+        </button>
+    </form>
+
+    <!-- Ссылка на вход (зеркальное отображение блока регистрации из login.html) -->
+    <div class="flex items-center justify-between text-sm text-[#2F5233]">
+        <span class="opacity-75">Уже есть аккаунт?</span>
+        <a 
+            href="{% url 'login' %}" 
+            class="py-2 px-4 bg-[#E8F6EA] hover:bg-[#D5EAD8] text-[#2F5233] font-medium rounded-xl transition duration-200 border border-[#7DAF84]/50"
+        >
+            Войти
+        </a>
+    </div>
+
+{% endblock content %}
