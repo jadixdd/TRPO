@@ -1,9 +1,9 @@
 from decimal import Decimal
 
 from django.contrib.auth.models import User
+from django.contrib.messages import get_messages  # <-- ДОБАВЛЕН ИМПОРТ
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django.contrib.messages import get_messages  # <-- ДОБАВЛЕН ИМПОРТ
 
 from app.models import Category, Expense
 
