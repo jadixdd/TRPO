@@ -28,9 +28,14 @@ jobs:
         pip install -r requirements.txt
         pip install flake8 pytest pytest-django pytest-cov
 
-    - name: Lint with flake8
+    - name: Format with Black and isort
       run: |
-        flake8 . --exclude=migrations --ignore=E501,W503
+        black . --check --diff || (echo "Run 'black .' locally" && exit 1)
+        isort . --check --diff || (echo "Run 'isort .' locally" && exit 1)
+        
+    - name: Remove unused imports
+      run: |
+        autoflake --in-place --remove-all-unused-imports -r . || true
 
     - name: Run tests with SQLite
       env:
