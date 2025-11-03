@@ -22,5 +22,4 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("app.urls")),
-    path("logout/", LogoutView.as_view(next_page="home"), name="logout"),
 ]
