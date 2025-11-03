@@ -101,13 +101,18 @@ def expenses(request):
         category = Category.objects.create(user=request.user, name=name)
         return JsonResponse({
             'success': True,
-            'category': {'name': category.name}
+            'category': {
+                'id': category.id,      # ← ОБЯЗАТЕЛЬНО!
+                'name': category.name
+            }
         })
 
     # === POST: Добавление новой траты ===
     if request.method == 'POST' and request.POST.get('action') == 'add_expense':
+        # Проверяем, AJAX-запрос ли это
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
         try:
-            # 1. Сумма
             amount_str = request.POST.get('amount', '').strip()
             if not amount_str:
                 raise ValueError('Сумма обязательна')
@@ -118,42 +123,49 @@ def expenses(request):
             except InvalidOperation:
                 raise ValueError('Введите корректную сумму (например: 123.45)')
 
-            # 2. Категория
             category_id = request.POST.get('category')
             if not category_id:
                 raise ValueError('Выберите категорию')
             category = Category.objects.get(id=category_id, user=request.user)
 
-            # 3. Дата
             date_str = request.POST.get('date')
             if not date_str:
                 raise ValueError('Дата обязательна')
 
-            # 4. Описание (необязательно)
             description = request.POST.get('description', '').strip()
 
-            # 5. Сохранение
             Expense.objects.create(
                 user=request.user,
                 category=category,
                 amount=amount,
                 description=description,
-                date=date_str  # ← Django сам преобразует в date
+                date=date_str
             )
-            messages.success(request, 'Трата успешно добавлена!')
+
+            if is_ajax:
+                return JsonResponse({'success': True})
+            else:
+                messages.success(request, 'Трата успешно добавлена!')
+                return redirect('expenses')
 
         except Category.DoesNotExist:
-            messages.error(request, 'Выбранная категория не существует.')
+            error_msg = 'Выбранная категория не существует.'
         except ValueError as e:
-            messages.error(request, f'Ошибка: {str(e)}')
+            error_msg = str(e)
         except Exception as e:
-            messages.error(request, 'Неизвестная ошибка.')
+            error_msg = 'Неизвестная ошибка.'
             print(e)
 
-        return redirect('expenses')
+        if is_ajax:
+            return JsonResponse({'success': False, 'error': error_msg}, status=400)
+        else:
+            messages.error(request, error_msg)
+            return redirect('expenses')
 
     # === GET ===
-    expenses = Expense.objects.filter(user=request.user).select_related('category').order_by('-date')
+    expenses = Expense.objects.filter(user=request.user)\
+        .select_related('category')\
+        .order_by('-date', '-id')  # Сначала по дате, потом по ID
     categories = Category.objects.filter(user=request.user)
     today = timezone.now().date()
 
