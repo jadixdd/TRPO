@@ -1,26 +1,26 @@
 from django import forms
 from django.contrib.auth.models import User
 
+
 # Простая форма регистрации, использующая стандартного пользователя Django.
 # Для реального проекта, использующего email как username, может потребоваться
 # кастомная модель User, но для старта подойдет и эта.
 class RegisterForm(forms.ModelForm):
     # Добавляем поле для подтверждения пароля, которое не сохраняется в модели
     password_confirm = forms.CharField(
-        widget=forms.PasswordInput, 
-        label="Подтверждение пароля"
+        widget=forms.PasswordInput, label="Подтверждение пароля"
     )
-    
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ["username", "email", "password"]
         widgets = {
-            'password': forms.PasswordInput(),
+            "password": forms.PasswordInput(),
         }
         labels = {
-            'username': 'Имя пользователя',
-            'email': 'Email',
-            'password': 'Пароль',
+            "username": "Имя пользователя",
+            "email": "Email",
+            "password": "Пароль",
         }
 
     def clean(self):
@@ -29,9 +29,7 @@ class RegisterForm(forms.ModelForm):
         password_confirm = cleaned_data.get("password_confirm")
 
         if password and password_confirm and password != password_confirm:
-            raise forms.ValidationError(
-                "Пароли не совпадают."
-            )
+            raise forms.ValidationError("Пароли не совпадают.")
         return cleaned_data
 
     def save(self, commit=True):
