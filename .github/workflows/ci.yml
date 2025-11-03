@@ -41,6 +41,7 @@ jobs:
       env:
         DEBUG: True
         SECRET_KEY: test-secret-key
+        DJANGO_SETTINGS_MODULE: household.settings
       run: |
         pytest --cov=. --cov-report=xml --cov-report=term
 
