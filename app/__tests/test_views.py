@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django.contrib.messages import get_messages # <-- ДОБАВЛЕН ИМПОРТ
+from django.contrib.messages import get_messages  # <-- ДОБАВЛЕН ИМПОРТ
 
 from app.models import Category, Expense
 
@@ -25,7 +25,7 @@ class AuthViewsTest(TestCase):
             reverse("login"), {"username": "testuser", "password": "wrong"}
         )
         self.assertEqual(response.status_code, 200)
-        
+
         # 🟢 ИСПРАВЛЕНО: Преобразуем хранилище в список (list) для доступа по индексу
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages), 1)
@@ -37,9 +37,9 @@ class AuthViewsTest(TestCase):
         self.assertRedirects(response, reverse("login"))
 
 
-# 🟢 ИСПРАВЛЕНИЕ: Устанавливаем LOGIN_URL в тестовом окружении, 
+# 🟢 ИСПРАВЛЕНИЕ: Устанавливаем LOGIN_URL в тестовом окружении,
 # чтобы декоратор @login_required перенаправлял на '/login/', а не на дефолтный '/accounts/login/'.
-@override_settings(LOGIN_URL='/login/') 
+@override_settings(LOGIN_URL="/login/")
 class ExpensesViewTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -50,9 +50,7 @@ class ExpensesViewTest(TestCase):
     def test_expenses_page_requires_login(self):
         self.client.logout()
         response = self.client.get(reverse("expenses"))
-        self.assertRedirects(
-            response, f"{reverse('login')}?next={reverse('expenses')}"
-        )
+        self.assertRedirects(response, f"{reverse('login')}?next={reverse('expenses')}")
 
     def test_add_expense(self):
         response = self.client.post(
@@ -66,7 +64,7 @@ class ExpensesViewTest(TestCase):
             },
             follow=True,
         )
-        
+
         # 🟢 ИСПРАВЛЕНО: Преобразуем хранилище в список (list) для доступа по индексу
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages), 1)
